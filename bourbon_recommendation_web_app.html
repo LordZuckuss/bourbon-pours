@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>What Should I Sip Next? - Bourbon Recommendations</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- Google Fonts: Playfair Display for serif elegant headlines, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        amber: {
+                            50: '#fffbe1',
+                            100: '#fff3b8',
+                            200: '#ffe270',
+                            300: '#ffd028',
+                            400: '#f5b800',
+                            500: '#d99400',
+                            600: '#b26e00',
+                            700: '#8f4f03',
+                            800: '#773e0a',
+                            900: '#64330f',
+                            950: '#3a1a05',
+                        },
+                        oak: {
+                            800: '#1c1511',
+                            900: '#140d09',
+                            950: '#0b0705',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0705;
+            color: #e5e7eb;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(217, 148, 0, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(143, 79, 3, 0.1) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+        .bourbon-glow {
+            box-shadow: 0 0 25px -5px rgba(217, 148, 0, 0.25);
+        }
+        .bourbon-card {
+            background: linear-gradient(145deg, rgba(28, 21, 17, 0.95), rgba(20, 13, 9, 0.98));
+            border: 1px solid rgba(217, 148, 0, 0.2);
+            backdrop-filter: blur(8px);
+        }
+        .bourbon-gradient-text {
+            background: linear-gradient(135deg, #ffe270 0%, #d99400 50%, #8f4f03 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .bourbon-btn {
+            background: linear-gradient(135deg, #d99400 0%, #b26e00 100%);
+            transition: all 0.2s ease-in-out;
+        }
+        .bourbon-btn:hover {
+            background: linear-gradient(135deg, #f5b800 0%, #d99400 100%);
+            box-shadow: 0 0 15px rgba(217, 148, 0, 0.35);
+        }
+        .venmo-btn {
+            background: linear-gradient(135deg, #008CFF 0%, #0055A5 100%);
+            transition: all 0.2s ease-in-out;
+        }
+        .venmo-btn:hover {
+            background: linear-gradient(135deg, #289eff 0%, #006cd4 100%);
+            box-shadow: 0 0 15px rgba(0, 140, 255, 0.35);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0705;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #64330f;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans flex flex-col justify-between pb-10">
+
+    <!-- Navigation / Header Bar -->
+    <header class="sticky top-0 z-40 bg-oak-950/90 backdrop-blur-md border-b border-amber-900/30 px-4 py-3">
+        <div class="max-w-xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-glass-whiskey text-amber-400 text-xl"></i>
+                <span class="font-serif font-bold text-lg text-amber-100 tracking-wide">What Should I Sip Next?</span>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <!-- Shirt / QR Modal Trigger -->
+                <button id="openQrBtn" class="bg-amber-950/70 hover:bg-amber-900/80 text-amber-300 border border-amber-700/40 text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 transition shadow-sm">
+                    <i class="fa-solid fa-shirt text-amber-400"></i>
+                    <span>T-Shirt QR Code</span>
+                </button>
+                <!-- Host Settings Button -->
+                <button id="openSettingsBtn" class="bg-oak-800 hover:bg-oak-700 text-amber-400 border border-amber-800/40 p-2 rounded-full transition" title="Set Venmo Profile">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-xl mx-auto px-4 pt-6 w-full flex-grow space-y-6">
+
+        <!-- Banner Hero Display -->
+        <div class="bourbon-card rounded-2xl p-6 text-center relative overflow-hidden bourbon-glow">
+            <div class="absolute -right-10 -bottom-10 opacity-10 text-amber-500 pointer-events-none">
+                <i class="fa-solid fa-whiskey-glass text-9xl"></i>
+            </div>
+            
+            <span class="inline-block px-3 py-1 bg-amber-950/80 border border-amber-600/30 text-amber-400 rounded-full text-xs font-semibold tracking-wider uppercase mb-3">
+                <i class="fa-solid fa-compass mr-1"></i> Bourbon & Rye Recommendations
+            </span>
+            
+            <h1 class="font-serif text-3xl sm:text-4xl font-bold bourbon-gradient-text mb-2 leading-tight">
+                What Should I Sip Next?
+            </h1>
+            <p class="text-xs sm:text-sm text-amber-200/80 max-w-md mx-auto font-light leading-relaxed">
+                Scanned the shirt at the bar? Share your favorite bourbon or whiskey recommendation below!
+            </p>
+
+            <!-- T-Shirt Host Indicator -->
+            <div class="mt-4 pt-3 border-t border-amber-900/30 flex items-center justify-center gap-2 text-xs text-amber-300/90">
+                <span>Wearing the shirt:</span>
+                <span id="activeHostDisplay" class="font-bold bg-amber-950 px-2.5 py-0.5 rounded border border-amber-800 text-amber-400">@YourVenmoHandle</span>
+                <button id="quickEditVenmo" class="text-amber-500 hover:underline text-[10px] ml-1">(Edit Handle)</button>
+            </div>
+        </div>
+
+        <!-- Bourbon Recommendation Form -->
+        <section class="bourbon-card rounded-2xl p-5 border border-amber-800/30">
+            <h2 class="font-serif text-xl font-semibold text-amber-100 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-pen-fancy text-amber-500 text-base"></i>
+                Submit a Pour Recommendation
+            </h2>
+
+            <form id="bourbonForm" class="space-y-4">
+                <!-- Bourbon Name & Distillery (Grid) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="bourbonInput" class="block text-xs font-medium text-amber-200/90 mb-1">
+                            Bourbon / Whiskey Name <span class="text-amber-500">*</span>
+                        </label>
+                        <input type="text" id="bourbonInput" required placeholder="e.g. Eagle Rare 10, Woodford Double Oaked" 
+                            class="w-full bg-oak-900/90 border border-amber-800/50 rounded-xl px-3.5 py-2.5 text-sm text-amber-100 placeholder-amber-700/80 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition">
+                    </div>
+                    <div>
+                        <label for="distilleryInput" class="block text-xs font-medium text-amber-200/90 mb-1">
+                            Distillery <span class="text-amber-600 text-[10px]">(Optional)</span>
+                        </label>
+                        <input type="text" id="distilleryInput" placeholder="e.g. Buffalo Trace, Woodford Reserve" 
+                            class="w-full bg-oak-900/90 border border-amber-800/50 rounded-xl px-3.5 py-2.5 text-sm text-amber-100 placeholder-amber-700/80 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition">
+                    </div>
+                </div>
+
+                <!-- Tasting Notes & Why Try It -->
+                <div>
+                    <label for="notesInput" class="block text-xs font-medium text-amber-200/90 mb-1">
+                        Tasting Notes / Reason to Try <span class="text-amber-600 text-[10px]">(Optional)</span>
+                    </label>
+                    <textarea id="notesInput" rows="2" placeholder="e.g. Great notes of vanilla and toasted oak. Drink it neat or with a drop of water!" 
+                        class="w-full bg-oak-900/90 border border-amber-800/50 rounded-xl px-3.5 py-2.5 text-sm text-amber-100 placeholder-amber-700/80 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition resize-none"></textarea>
+                </div>
+
+                <!-- User Name/Handle Input -->
+                <div>
+                    <label for="nameInput" class="block text-xs font-medium text-amber-200/90 mb-1">
+                        Recommended By <span class="text-amber-600 text-[10px]">(Optional)</span>
+                    </label>
+                    <input type="text" id="nameInput" placeholder="e.g. Bourbon Fan or Friend at the bar" 
+                        class="w-full bg-oak-900/90 border border-amber-800/50 rounded-xl px-3.5 py-2.5 text-sm text-amber-100 placeholder-amber-700/80 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition">
+                </div>
+
+                <!-- Direct Venmo Sponsor Callout Line -->
+                <div class="pt-3 border-t border-amber-900/30 bg-oak-950/50 p-3.5 rounded-xl border border-amber-800/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 rounded-full bg-amber-950 border border-amber-700/50 flex items-center justify-center text-amber-400 flex-shrink-0">
+                            <i class="fa-solid fa-glass-whiskey text-xs"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-medium text-amber-200">Want to sponsor this pour for me?</p>
+                            <p class="text-[10px] text-amber-400/70">Totally optional! Tips go straight to my Venmo.</p>
+                        </div>
+                    </div>
+                    <a id="formSponsorBtn" href="https://venmo.com/" target="_blank" rel="noopener noreferrer" 
+                       class="venmo-btn text-white font-semibold text-xs px-3.5 py-2 rounded-lg flex items-center justify-center gap-1.5 shrink-0 shadow-sm">
+                        <i class="fa-solid fa-heart text-amber-300"></i>
+                        <span>Sponsor on Venmo</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-70"></i>
+                    </a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full bourbon-btn text-oak-950 font-bold text-sm py-3 px-4 rounded-xl flex items-center justify-center gap-2 shadow-lg hover:brightness-110 active:scale-[0.99] transition mt-2">
+                    <i class="fa-solid fa-wine-bottle"></i>
+                    <span>Share Recommendation</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- Live Recommendations Stream -->
+        <section class="space-y-4">
+            <div class="flex items-center justify-between border-b border-amber-900/30 pb-2">
+                <h2 class="font-serif text-xl font-semibold text-amber-100 flex items-center gap-2">
+                    <i class="fa-solid fa-list-ul text-amber-500 text-base"></i>
+                    Recommended Pours
+                    <span id="recommendationCount" class="text-xs bg-amber-950 text-amber-400 border border-amber-800 px-2 py-0.5 rounded-full ml-1">0</span>
+                </h2>
+                <button id="clearAllBtn" class="text-xs text-amber-600 hover:text-amber-400 transition">
+                    Clear Feed
+                </button>
+            </div>
+
+            <!-- List Container -->
+            <div id="recommendationsList" class="space-y-3">
+                <!-- Dynamically populated via JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <!-- Settings Modal (Set Host Venmo Handle) -->
+    <div id="settingsModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="bourbon-card w-full max-w-md rounded-2xl p-6 border border-amber-700/50 relative shadow-2xl">
+            <button id="closeSettingsBtn" class="absolute top-4 right-4 text-amber-500 hover:text-amber-200">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-full bg-amber-950 border border-amber-700/60 flex items-center justify-center text-amber-400">
+                    <i class="fa-solid fa-user-gear text-lg"></i>
+                </div>
+                <div>
+                    <h3 class="font-serif text-lg font-bold text-amber-100">Shirt Wearer Settings</h3>
+                    <p class="text-xs text-amber-300/70">Set your Venmo handle to receive pour sponsorships</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label for="venmoHandleInput" class="block text-xs font-medium text-amber-200 mb-1">
+                        Your Venmo Username
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-amber-600 font-medium text-sm">@</span>
+                        <input type="text" id="venmoHandleInput" placeholder="YourVenmoHandle" 
+                            class="w-full bg-oak-900 border border-amber-800/60 rounded-xl pl-8 pr-4 py-2.5 text-sm text-amber-100 focus:outline-none focus:border-amber-500">
+                    </div>
+                    <p class="text-[11px] text-amber-400/60 mt-1">
+                        All "Sponsor Pour" buttons across the app will link directly to <span class="font-mono text-amber-300">venmo.com/u/YourHandle</span>
+                    </p>
+                </div>
+
+                <div class="pt-2 flex gap-3">
+                    <button id="saveSettingsBtn" class="flex-1 bourbon-btn text-oak-950 font-bold text-sm py-2.5 rounded-xl">
+                        Save Venmo Handle
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- T-Shirt QR Code Generator Modal -->
+    <div id="qrModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 hidden">
+        <div class="bourbon-card w-full max-w-md rounded-2xl p-6 border border-amber-600/40 relative shadow-2xl text-center">
+            <button id="closeQrBtn" class="absolute top-4 right-4 text-amber-500 hover:text-amber-200">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+
+            <div class="mb-4">
+                <span class="p-2.5 rounded-full bg-amber-950 border border-amber-700/50 inline-block text-amber-400 mb-2">
+                    <i class="fa-solid fa-shirt text-2xl"></i>
+                </span>
+                <h3 class="font-serif text-xl font-bold text-amber-100">Print Code on T-Shirt</h3>
+                <p class="text-xs text-amber-300/70 mt-1">
+                    Print this QR code on your shirt so friends or bar patrons can scan and submit recommendations directly!
+                </p>
+            </div>
+
+            <!-- Target URL Input -->
+            <div class="mb-4 text-left">
+                <label for="qrUrlInput" class="block text-[11px] uppercase tracking-wider font-semibold text-amber-400 mb-1">
+                    Your Web Application URL
+                </label>
+                <div class="flex gap-2">
+                    <input type="text" id="qrUrlInput" class="flex-1 bg-oak-900 border border-amber-800/60 rounded-lg px-3 py-1.5 text-xs text-amber-100 focus:outline-none focus:border-amber-500" value="">
+                    <button id="updateQrBtn" class="bg-amber-900 hover:bg-amber-800 text-amber-200 text-xs px-3 py-1.5 rounded-lg border border-amber-700/50 font-medium">
+                        Update
+                    </button>
+                </div>
+            </div>
+
+            <!-- QR Code Container -->
+            <div class="bg-white p-4 rounded-xl inline-block shadow-inner mb-4 border-2 border-amber-500/50" id="qrcodeWrapper">
+                <div id="qrcode" class="flex justify-center items-center"></div>
+            </div>
+
+            <div class="space-y-2">
+                <button id="downloadQrBtn" class="w-full bg-amber-950 hover:bg-amber-900 text-amber-300 border border-amber-700/60 font-semibold text-xs py-2.5 rounded-xl flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download High-Res QR for Shirt Printer</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-amber-900 text-amber-100 border border-amber-500/50 px-4 py-2.5 rounded-xl text-xs font-medium shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-amber-400"></i>
+        <span id="toastMessage">Success</span>
+    </div>
+
+    <script>
+        // LocalStorage Keys
+        const STORAGE_KEY_RECS = 'bourbon_recommendations_v3';
+        const STORAGE_KEY_VENMO = 'bourbon_venmo_handle';
+        
+        let venmoHandle = localStorage.getItem(STORAGE_KEY_VENMO) || 'BourbonEnthusiast';
+        let recommendations = JSON.parse(localStorage.getItem(STORAGE_KEY_RECS) || '[]');
+
+        // Seed initial sample recommendations if empty
+        if (recommendations.length === 0) {
+            recommendations = [
+                {
+                    id: '1',
+                    bourbon: "Woodford Reserve Double Oaked",
+                    distillery: "Woodford Reserve",
+                    notes: "Rich, sweet oak flavor with subtle vanilla and butterscotch notes. Excellent neat!",
+                    recommender: "Kentucky Stranger",
+                    timestamp: "Just now"
+                },
+                {
+                    id: '2',
+                    bourbon: "Angel's Envy Port Cask Finish",
+                    distillery: "Louisville Distillate",
+                    notes: "Finished in ruby port wine casks. Soft, ripe fruit undertones and smooth finish.",
+                    recommender: "Sarah M.",
+                    timestamp: "10 mins ago"
+                }
+            ];
+            saveRecommendations();
+        }
+
+        // DOM Elements
+        const activeHostDisplay = document.getElementById('activeHostDisplay');
+        const bourbonForm = document.getElementById('bourbonForm');
+        const bourbonInput = document.getElementById('bourbonInput');
+        const distilleryInput = document.getElementById('distilleryInput');
+        const notesInput = document.getElementById('notesInput');
+        const nameInput = document.getElementById('nameInput');
+        const formSponsorBtn = document.getElementById('formSponsorBtn');
+        
+        const recommendationsList = document.getElementById('recommendationsList');
+        const recommendationCount = document.getElementById('recommendationCount');
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        
+        // Modals DOM
+        const settingsModal = document.getElementById('settingsModal');
+        const openSettingsBtn = document.getElementById('openSettingsBtn');
+        const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+        const quickEditVenmo = document.getElementById('quickEditVenmo');
+        const venmoHandleInput = document.getElementById('venmoHandleInput');
+        const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+
+        const qrModal = document.getElementById('qrModal');
+        const openQrBtn = document.getElementById('openQrBtn');
+        const closeQrBtn = document.getElementById('closeQrBtn');
+        const qrUrlInput = document.getElementById('qrUrlInput');
+        const updateQrBtn = document.getElementById('updateQrBtn');
+        const qrcodeContainer = document.getElementById('qrcode');
+        const downloadQrBtn = document.getElementById('downloadQrBtn');
+
+        let qrCodeObj = null;
+
+        // Helper to construct Venmo URL for the owner
+        function getOwnerVenmoUrl(note = '') {
+            const cleanHandle = venmoHandle.replace('@', '').trim();
+            if (!cleanHandle) return 'https://venmo.com/';
+            const encodedNote = note ? `&note=${encodeURIComponent(note)}` : '';
+            return `https://venmo.com/u/${cleanHandle}?txn=pay${encodedNote}`;
+        }
+
+        // On Load Initializer
+        window.addEventListener('DOMContentLoaded', () => {
+            updateHostUI();
+            renderRecommendations();
+            initQrCode();
+        });
+
+        function updateHostUI() {
+            const formatted = venmoHandle.startsWith('@') ? venmoHandle : `@${venmoHandle}`;
+            activeHostDisplay.textContent = formatted;
+            venmoHandleInput.value = venmoHandle.replace('@', '');
+            
+            // Update form sponsor button URL
+            formSponsorBtn.href = getOwnerVenmoUrl('Sponsoring a bourbon pour!');
+        }
+
+        function saveRecommendations() {
+            localStorage.setItem(STORAGE_KEY_RECS, JSON.stringify(recommendations));
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 3000);
+        }
+
+        function renderRecommendations() {
+            recommendationCount.textContent = recommendations.length;
+            recommendationsList.innerHTML = '';
+
+            if (recommendations.length === 0) {
+                recommendationsList.innerHTML = `
+                    <div class="bourbon-card rounded-2xl p-8 text-center text-amber-500/60">
+                        <i class="fa-solid fa-whiskey-glass text-3xl mb-2 opacity-50"></i>
+                        <p class="text-sm">No recommendations posted yet.</p>
+                        <p class="text-xs text-amber-600/50 mt-1">Be the first to share a pour suggestion above!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            recommendations.forEach((item) => {
+                const card = document.createElement('div');
+                card.className = 'bourbon-card rounded-xl p-4 transition hover:border-amber-600/40 relative group';
+
+                // Single Venmo link always pointing to shirt owner handle
+                const venmoUrl = getOwnerVenmoUrl(`Sponsoring pour: ${item.bourbon}`);
+
+                card.innerHTML = `
+                    <div class="flex items-start justify-between gap-3 mb-2">
+                        <div>
+                            <h3 class="font-serif font-bold text-amber-100 text-base leading-snug">
+                                ${escapeHtml(item.bourbon)}
+                            </h3>
+                            <div class="flex flex-wrap items-center gap-2 text-xs text-amber-400/70 mt-0.5">
+                                ${item.distillery ? `<span class="bg-amber-950/90 text-amber-400 px-2 py-0.5 rounded border border-amber-900 text-[10px] font-medium"><i class="fa-solid fa-industry mr-1"></i>${escapeHtml(item.distillery)}</span>` : ''}
+                                <span class="font-medium text-amber-300">By ${escapeHtml(item.recommender || 'Bourbon Friend')}</span>
+                                <span class="text-[10px] text-amber-600/80">• ${item.timestamp}</span>
+                            </div>
+                        </div>
+                        <button onclick="deleteRecommendation('${item.id}')" class="text-amber-800 hover:text-amber-500 p-1 transition opacity-60 group-hover:opacity-100" title="Delete">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+
+                    ${item.notes ? `
+                        <p class="text-xs text-amber-200/80 bg-oak-900/60 p-2.5 rounded-lg border border-amber-900/30 mb-3 leading-relaxed">
+                            "${escapeHtml(item.notes)}"
+                        </p>
+                    ` : ''}
+
+                    <div class="mt-3 flex items-center justify-between border-t border-amber-900/20 pt-2.5">
+                        <span class="text-[11px] text-amber-600/80 flex items-center gap-1">
+                            <i class="fa-solid fa-thumbs-up text-amber-500"></i> Recommended Pour
+                        </span>
+                        
+                        <a href="${venmoUrl}" target="_blank" rel="noopener noreferrer" 
+                           class="bg-amber-950/80 hover:bg-amber-900 border border-amber-700/50 text-amber-300 font-medium text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow-sm">
+                            <i class="fa-solid fa-glass-water text-amber-400"></i>
+                            <span>Sponsor This Pour</span>
+                            <i class="fa-solid fa-arrow-up-right-from-square text-[9px] opacity-60"></i>
+                        </a>
+                    </div>
+                `;
+                recommendationsList.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return {
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    '"': '&quot;',
+                    "'": '&#039;'
+                }[m];
+            });
+        }
+
+        // Form Submit Handler
+        bourbonForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const bourbonName = bourbonInput.value.trim();
+            if (!bourbonName) return;
+
+            const newRec = {
+                id: Date.now().toString(),
+                bourbon: bourbonName,
+                distillery: distilleryInput.value.trim(),
+                notes: notesInput.value.trim(),
+                recommender: nameInput.value.trim() || 'Bourbon Friend',
+                timestamp: "Just now"
+            };
+
+            recommendations.unshift(newRec);
+            saveRecommendations();
+            renderRecommendations();
+
+            // Reset Form Fields
+            bourbonInput.value = '';
+            distilleryInput.value = '';
+            notesInput.value = '';
+            nameInput.value = '';
+
+            showToast("Recommendation shared successfully!");
+        });
+
+        // Delete single recommendation
+        window.deleteRecommendation = function(id) {
+            recommendations = recommendations.filter(item => item.id !== id);
+            saveRecommendations();
+            renderRecommendations();
+            showToast("Recommendation removed");
+        };
+
+        // Clear all
+        clearAllBtn.addEventListener('click', () => {
+            if (recommendations.length === 0) return;
+            recommendations = [];
+            saveRecommendations();
+            renderRecommendations();
+            showToast("Feed cleared");
+        });
+
+        // Settings Modal Handlers
+        function openSettings() { settingsModal.classList.remove('hidden'); }
+        function closeSettings() { settingsModal.classList.add('hidden'); }
+
+        openSettingsBtn.addEventListener('click', openSettings);
+        quickEditVenmo.addEventListener('click', openSettings);
+        closeSettingsBtn.addEventListener('click', closeSettings);
+
+        saveSettingsBtn.addEventListener('click', () => {
+            const newHandle = venmoHandleInput.value.trim();
+            if (newHandle) {
+                venmoHandle = newHandle;
+                localStorage.setItem(STORAGE_KEY_VENMO, venmoHandle);
+                updateHostUI();
+                renderRecommendations();
+                showToast("Venmo handle saved!");
+                closeSettings();
+            }
+        });
+
+        // QR Code Generator initialization
+        function initQrCode() {
+            const currentUrl = window.location.href.startsWith('http') 
+                ? window.location.href 
+                : 'https://what-should-i-sip-next.demo';
+
+            qrUrlInput.value = currentUrl;
+            
+            qrcodeContainer.innerHTML = '';
+            qrCodeObj = new QRCode(qrcodeContainer, {
+                text: currentUrl,
+                width: 180,
+                height: 180,
+                colorDark: "#1c1511",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        openQrBtn.addEventListener('click', () => {
+            qrModal.classList.remove('hidden');
+        });
+
+        closeQrBtn.addEventListener('click', () => {
+            qrModal.classList.add('hidden');
+        });
+
+        updateQrBtn.addEventListener('click', () => {
+            const url = qrUrlInput.value.trim();
+            if (url && qrCodeObj) {
+                qrCodeObj.clear();
+                qrCodeObj.makeCode(url);
+                showToast("QR Code updated!");
+            }
+        });
+
+        // Download QR Code Image for printing
+        downloadQrBtn.addEventListener('click', () => {
+            const img = qrcodeContainer.querySelector('img');
+            const canvas = qrcodeContainer.querySelector('canvas');
+            
+            let imageSrc = '';
+            if (img && img.src) {
+                imageSrc = img.src;
+            } else if (canvas) {
+                imageSrc = canvas.toDataURL("image/png");
+            }
+
+            if (imageSrc) {
+                const link = document.createElement('a');
+                link.href = imageSrc;
+                link.download = `Bourbon_TShirt_QRCode.png`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast("QR Code image downloaded!");
+            } else {
+                showToast("Could not export QR image.");
+            }
+        });
+
+        // Close modal on background click
+        [settingsModal, qrModal].forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
