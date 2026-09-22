@@ -49,7 +49,7 @@
     }
   </style>
 
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDKs (Compat version for direct browser script support) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
@@ -65,10 +65,15 @@
           <p class="text-xs text-amber-200/70">Bourbon Recommendations & Tasting Feed</p>
         </div>
       </div>
-
-      <!-- ADMIN LOGIN / STATUS BUTTON -->
-      <div id="adminHeaderControl">
-        <!-- Dynamically rendered via JS -->
+      
+      <!-- ADMIN CONTROLS -->
+      <div id="adminHeaderControls" class="flex items-center space-x-2">
+        <button 
+          onclick="openAdminModal()" 
+          class="text-xs text-amber-400/60 hover:text-amber-300 transition-colors flex items-center space-x-1 px-2.5 py-1 rounded-lg border border-amber-900/40 bg-oak-950/40">
+          <span>🔑</span>
+          <span>Admin</span>
+        </button>
       </div>
     </div>
   </header>
@@ -148,7 +153,7 @@
           ></textarea>
         </div>
 
-        <!-- Initial Star Rating (Placed Last) -->
+        <!-- Initial Star Rating -->
         <div>
           <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">
             Your Rating for This Pour
@@ -172,7 +177,7 @@
           </p>
           <a 
             id="directVenmoBtn" 
-            href="https://venmo.com/Daniel-Sink" 
+            href="https://venmo.com/Lord-Zuckuss" 
             target="_blank" 
             rel="noopener noreferrer"
             class="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-xl text-xs shadow-md transition-all">
@@ -221,58 +226,57 @@
       </div>
 
       <div id="recommendationsList" class="space-y-4">
-        <!-- Recommendation cards render here -->
+        <!-- Recommendation cards will render here -->
       </div>
     </section>
 
   </main>
-
-  <!-- ADMIN MODAL -->
-  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-oak-900 border border-amber-900/60 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
-      <h3 class="text-lg font-bold text-amber-300 mb-2 flex items-center space-x-2">
-        <span>🔑</span>
-        <span>Admin Verification</span>
-      </h3>
-      <p class="text-xs text-amber-200/70 mb-4">Enter your Admin PIN to unlock moderation controls.</p>
-      
-      <form onsubmit="handleAdminLogin(event)" class="space-y-4">
-        <input 
-          type="password" 
-          id="adminPinInput" 
-          placeholder="Enter Admin PIN" 
-          required 
-          class="w-full bg-oak-950 border border-amber-900/50 rounded-xl px-4 py-2 text-amber-100 placeholder-amber-800 text-center tracking-widest text-lg focus:outline-none focus:border-amber-500"
-        />
-        <p id="adminAuthError" class="text-xs text-red-400 hidden text-center">Incorrect PIN. Try again.</p>
-        <div class="flex items-center justify-end space-x-2 pt-2">
-          <button 
-            type="button" 
-            onclick="closeAdminModal()" 
-            class="px-4 py-2 text-xs text-amber-400/80 hover:text-amber-200">
-            Cancel
-          </button>
-          <button 
-            type="submit" 
-            class="bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs px-4 py-2 rounded-xl shadow-md">
-            Login
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- FOOTER -->
   <footer class="border-t border-amber-900/30 bg-oak-950 py-6 text-center text-xs text-amber-300/70 font-medium">
     <p>Kentucky Bourbon Trip October 2026</p>
   </footer>
 
+  <!-- ADMIN PASSWORD MODAL -->
+  <div id="adminModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-oak-900 border border-amber-900/50 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
+      <h3 class="text-lg font-bold text-amber-200 mb-2">Admin Authentication</h3>
+      <p class="text-xs text-amber-300/70 mb-4">Enter your PIN to manage or delete recommendations.</p>
+      
+      <form onsubmit="handleAdminAuth(event)" class="space-y-4">
+        <input 
+          type="password" 
+          id="adminPinInput" 
+          placeholder="Enter PIN" 
+          class="w-full bg-oak-950 border border-amber-900/50 rounded-xl px-4 py-2.5 text-amber-100 placeholder-amber-800 focus:outline-none focus:border-amber-500 text-center tracking-widest text-lg"
+          required 
+        />
+        <div id="adminAuthError" class="text-xs text-red-400 hidden">Incorrect PIN. Try again.</div>
+        
+        <div class="flex items-center space-x-2 pt-2">
+          <button 
+            type="button" 
+            onclick="closeAdminModal()" 
+            class="w-1/2 bg-oak-950 hover:bg-oak-900 text-amber-300/70 py-2 rounded-xl text-xs border border-amber-900/30">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="w-1/2 bg-amber-600 hover:bg-amber-500 text-white py-2 rounded-xl text-xs font-semibold shadow-md">
+            Unlock Admin
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC WITH REAL-TIME FIREBASE DB -->
   <script>
     // ==========================================
-    // 1. CONFIGURATION & STATE
+    // 1. CONFIGURATION
     // ==========================================
-    const MY_VENMO_HANDLE = "Daniel-Sink"; 
-    const ADMIN_PIN = "1986"; // Default Admin PIN
+    const MY_VENMO_HANDLE = "Lord-Zuckuss"; 
+    const ADMIN_PIN = "1986"; // Admin PIN for deleting posts
 
     // FIREBASE CONFIGURATION
     const firebaseConfig = {
@@ -292,11 +296,6 @@
     let currentSort = 'highest';
     let recommendations = [];
     let isAdmin = false;
-
-    // Check session storage for admin state
-    if (sessionStorage.getItem('admin_authenticated') === 'true') {
-      isAdmin = true;
-    }
 
     // Local tracking of voted IDs on this device
     function getVotedPours() {
@@ -319,6 +318,12 @@
     // 2. INITIALIZATION & LIVE LISTENER
     // ==========================================
     window.addEventListener('DOMContentLoaded', () => {
+      // Check admin status from session
+      if (sessionStorage.getItem('isAdminLoggedIn') === 'true') {
+        isAdmin = true;
+        updateAdminHeaderUI();
+      }
+
       // Set direct Venmo button link
       const venmoBtn = document.getElementById('directVenmoBtn');
       if (MY_VENMO_HANDLE && MY_VENMO_HANDLE !== "YourVenmoUsername") {
@@ -326,8 +331,6 @@
       } else {
         venmoBtn.href = "https://venmo.com";
       }
-
-      renderAdminHeaderControl();
 
       // Real-time listener for live updates across all devices
       db.collection("recommendations").onSnapshot((snapshot) => {
@@ -342,57 +345,27 @@
     });
 
     // ==========================================
-    // 3. ADMIN AUTHENTICATION CONTROLS
+    // 3. ADMIN AUTHENTICATION
     // ==========================================
-    function renderAdminHeaderControl() {
-      const container = document.getElementById('adminHeaderControl');
-      if (isAdmin) {
-        container.innerHTML = `
-          <div class="flex items-center space-x-2 bg-amber-950/80 border border-amber-600/50 px-3 py-1 rounded-xl">
-            <span class="text-xs text-amber-400 font-semibold flex items-center space-x-1">
-              <span>🛡️</span>
-              <span class="hidden sm:inline">Admin Mode</span>
-            </span>
-            <button 
-              onclick="logoutAdmin()" 
-              class="text-[11px] text-amber-200/80 hover:text-white underline">
-              Logout
-            </button>
-          </div>
-        `;
-      } else {
-        container.innerHTML = `
-          <button 
-            onclick="openAdminModal()" 
-            title="Admin Login" 
-            class="text-amber-400/60 hover:text-amber-300 text-xs flex items-center space-x-1 bg-oak-950/60 border border-amber-900/40 px-2.5 py-1 rounded-lg transition-all">
-            <span>🔑</span>
-            <span class="hidden sm:inline">Admin</span>
-          </button>
-        `;
-      }
-    }
-
     function openAdminModal() {
       document.getElementById('adminModal').classList.remove('hidden');
-      document.getElementById('adminAuthError').classList.add('hidden');
       document.getElementById('adminPinInput').value = '';
-      setTimeout(() => document.getElementById('adminPinInput').focus(), 100);
+      document.getElementById('adminAuthError').classList.add('hidden');
+      document.getElementById('adminPinInput').focus();
     }
 
     function closeAdminModal() {
       document.getElementById('adminModal').classList.add('hidden');
     }
 
-    function handleAdminLogin(e) {
+    function handleAdminAuth(e) {
       e.preventDefault();
       const inputPin = document.getElementById('adminPinInput').value;
-
       if (inputPin === ADMIN_PIN) {
         isAdmin = true;
-        sessionStorage.setItem('admin_authenticated', 'true');
+        sessionStorage.setItem('isAdminLoggedIn', 'true');
+        updateAdminHeaderUI();
         closeAdminModal();
-        renderAdminHeaderControl();
         renderRecommendations();
       } else {
         document.getElementById('adminAuthError').classList.remove('hidden');
@@ -401,18 +374,38 @@
 
     function logoutAdmin() {
       isAdmin = false;
-      sessionStorage.removeItem('admin_authenticated');
-      renderAdminHeaderControl();
+      sessionStorage.removeItem('isAdminLoggedIn');
+      updateAdminHeaderUI();
       renderRecommendations();
+    }
+
+    function updateAdminHeaderUI() {
+      const container = document.getElementById('adminHeaderControls');
+      if (isAdmin) {
+        container.innerHTML = `
+          <div class="flex items-center space-x-2 bg-amber-950/80 border border-amber-600/40 px-3 py-1 rounded-lg">
+            <span class="text-xs text-amber-300 font-semibold">🛡️ Admin Mode</span>
+            <button onclick="logoutAdmin()" class="text-[10px] text-amber-400 hover:underline border-l border-amber-800/60 pl-2">Logout</button>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <button 
+            onclick="openAdminModal()" 
+            class="text-xs text-amber-400/60 hover:text-amber-300 transition-colors flex items-center space-x-1 px-2.5 py-1 rounded-lg border border-amber-900/40 bg-oak-950/40">
+            <span>🔑</span>
+            <span>Admin</span>
+          </button>
+        `;
+      }
     }
 
     function deleteRecommendation(id) {
       if (!isAdmin) return;
-      
-      // Deleting directly from Firestore
-      db.collection("recommendations").doc(id).delete().catch((err) => {
-        console.error("Error deleting document: ", err);
-      });
+      if (confirm("Are you sure you want to remove this recommendation?")) {
+        db.collection("recommendations").doc(id).delete()
+          .catch(err => console.error("Error deleting document: ", err));
+      }
     }
 
     // ==========================================
@@ -488,7 +481,7 @@
         const hasVoted = votedPours.includes(item.id);
 
         return `
-          <div class="bg-oak-900/90 border border-amber-900/40 rounded-xl p-5 shadow-md hover:border-amber-700/50 transition-all flex flex-col justify-between space-y-3 relative">
+          <div class="bg-oak-900/90 border border-amber-900/40 rounded-xl p-5 shadow-md hover:border-amber-700/50 transition-all flex flex-col justify-between space-y-3">
             <div>
               <div class="flex items-start justify-between">
                 <div>
@@ -539,18 +532,16 @@
               ` : ''}
             </div>
 
-            <!-- FOOTER ACTION BAR WITH SPONSOR AND ADMIN REMOVE -->
             <div class="pt-2 border-t border-amber-900/20 flex items-center justify-between">
               <div>
                 ${isAdmin ? `
                   <button 
-                    onclick="deleteRecommendation('${item.id}')" 
-                    title="Remove inappropriate post"
-                    class="inline-flex items-center space-x-1 text-red-400 hover:text-red-300 hover:bg-red-950/50 border border-red-900/40 px-2.5 py-1 rounded-lg text-xs font-medium transition-all">
+                    onclick="deleteRecommendation('${item.id}')"
+                    class="bg-red-950/60 hover:bg-red-900/80 text-red-300 border border-red-800/40 px-2.5 py-1 rounded-lg text-xs transition-colors flex items-center space-x-1">
                     <span>🗑️</span>
                     <span>Remove Pour</span>
                   </button>
-                ` : ''}
+                ` : '<span></span>'}
               </div>
 
               <a 
