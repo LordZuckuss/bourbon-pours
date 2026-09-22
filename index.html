@@ -49,7 +49,7 @@
     }
   </style>
 
-  <!-- Firebase SDKs (Compat version for direct browser script support) -->
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
@@ -64,6 +64,11 @@
           <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-amber-400 leading-tight">What Should I Sip Next?</h1>
           <p class="text-xs text-amber-200/70">Bourbon Recommendations & Tasting Feed</p>
         </div>
+      </div>
+
+      <!-- ADMIN LOGIN / STATUS BUTTON -->
+      <div id="adminHeaderControl">
+        <!-- Dynamically rendered via JS -->
       </div>
     </div>
   </header>
@@ -117,7 +122,33 @@
           </div>
         </div>
 
-        <!-- Initial Star Rating -->
+        <!-- Favorite Place or Distillery in KY -->
+        <div>
+          <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">
+            Favorite Place or Distillery in KY
+          </label>
+          <input 
+            type="text" 
+            id="favoriteKYSpot" 
+            placeholder="e.g. Buffalo Trace, Castle & Key, Michter's, The Silver Dollar"
+            class="w-full bg-oak-950/80 border border-amber-900/50 rounded-xl px-4 py-2.5 text-amber-100 placeholder-amber-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-sm transition-all"
+          />
+        </div>
+
+        <!-- Tasting Notes / Reason -->
+        <div>
+          <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">
+            Why Should I Try It? (Tasting Notes)
+          </label>
+          <textarea 
+            id="tastingNotes" 
+            rows="2" 
+            placeholder="e.g. Oaky finish with notes of vanilla, caramel, and a touch of rye spice..."
+            class="w-full bg-oak-950/80 border border-amber-900/50 rounded-xl px-4 py-2.5 text-amber-100 placeholder-amber-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-sm transition-all resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Initial Star Rating (Placed Last) -->
         <div>
           <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">
             Your Rating for This Pour
@@ -132,19 +163,6 @@
             </div>
             <span id="formRatingLabel" class="text-xs text-amber-300 font-medium ml-2">5 Stars</span>
           </div>
-        </div>
-
-        <!-- Tasting Notes / Reason -->
-        <div>
-          <label class="block text-xs font-semibold text-amber-300 uppercase tracking-wider mb-1">
-            Why Should I Try It? (Tasting Notes)
-          </label>
-          <textarea 
-            id="tastingNotes" 
-            rows="2" 
-            placeholder="e.g. Oaky finish with notes of vanilla, caramel, and a touch of rye spice..."
-            class="w-full bg-oak-950/80 border border-amber-900/50 rounded-xl px-4 py-2.5 text-amber-100 placeholder-amber-800 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-sm transition-all resize-none"
-          ></textarea>
         </div>
 
         <!-- Direct Sponsor Link -->
@@ -203,23 +221,58 @@
       </div>
 
       <div id="recommendationsList" class="space-y-4">
-        <!-- Recommendation cards will render here -->
+        <!-- Recommendation cards render here -->
       </div>
     </section>
 
   </main>
 
+  <!-- ADMIN MODAL -->
+  <div id="adminModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-oak-900 border border-amber-900/60 rounded-2xl p-6 max-w-sm w-full shadow-2xl relative">
+      <h3 class="text-lg font-bold text-amber-300 mb-2 flex items-center space-x-2">
+        <span>🔑</span>
+        <span>Admin Verification</span>
+      </h3>
+      <p class="text-xs text-amber-200/70 mb-4">Enter your Admin PIN to unlock moderation controls.</p>
+      
+      <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+        <input 
+          type="password" 
+          id="adminPinInput" 
+          placeholder="Enter Admin PIN" 
+          required 
+          class="w-full bg-oak-950 border border-amber-900/50 rounded-xl px-4 py-2 text-amber-100 placeholder-amber-800 text-center tracking-widest text-lg focus:outline-none focus:border-amber-500"
+        />
+        <p id="adminAuthError" class="text-xs text-red-400 hidden text-center">Incorrect PIN. Try again.</p>
+        <div class="flex items-center justify-end space-x-2 pt-2">
+          <button 
+            type="button" 
+            onclick="closeAdminModal()" 
+            class="px-4 py-2 text-xs text-amber-400/80 hover:text-amber-200">
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            class="bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs px-4 py-2 rounded-xl shadow-md">
+            Login
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- FOOTER -->
-  <footer class="border-t border-amber-900/30 bg-oak-950 py-6 text-center text-xs text-amber-300/50">
-    <p>Cheers! Please drink responsibly.</p>
+  <footer class="border-t border-amber-900/30 bg-oak-950 py-6 text-center text-xs text-amber-300/70 font-medium">
+    <p>Kentucky Bourbon Trip October 2026</p>
   </footer>
 
-  <!-- JAVASCRIPT LOGIC WITH REAL-TIME FIREBASE DB -->
   <script>
     // ==========================================
-    // 1. CONFIGURATION
+    // 1. CONFIGURATION & STATE
     // ==========================================
     const MY_VENMO_HANDLE = "Daniel-Sink"; 
+    const ADMIN_PIN = "1986"; // Default Admin PIN
 
     // FIREBASE CONFIGURATION
     const firebaseConfig = {
@@ -238,6 +291,29 @@
     let currentFormRating = 5;
     let currentSort = 'highest';
     let recommendations = [];
+    let isAdmin = false;
+
+    // Check session storage for admin state
+    if (sessionStorage.getItem('admin_authenticated') === 'true') {
+      isAdmin = true;
+    }
+
+    // Local tracking of voted IDs on this device
+    function getVotedPours() {
+      try {
+        return JSON.parse(localStorage.getItem('voted_pours') || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function recordVotedPour(id) {
+      const voted = getVotedPours();
+      if (!voted.includes(id)) {
+        voted.push(id);
+        localStorage.setItem('voted_pours', JSON.stringify(voted));
+      }
+    }
 
     // ==========================================
     // 2. INITIALIZATION & LIVE LISTENER
@@ -250,6 +326,8 @@
       } else {
         venmoBtn.href = "https://venmo.com";
       }
+
+      renderAdminHeaderControl();
 
       // Real-time listener for live updates across all devices
       db.collection("recommendations").onSnapshot((snapshot) => {
@@ -264,7 +342,81 @@
     });
 
     // ==========================================
-    // 3. FORM STAR RATING
+    // 3. ADMIN AUTHENTICATION CONTROLS
+    // ==========================================
+    function renderAdminHeaderControl() {
+      const container = document.getElementById('adminHeaderControl');
+      if (isAdmin) {
+        container.innerHTML = `
+          <div class="flex items-center space-x-2 bg-amber-950/80 border border-amber-600/50 px-3 py-1 rounded-xl">
+            <span class="text-xs text-amber-400 font-semibold flex items-center space-x-1">
+              <span>🛡️</span>
+              <span class="hidden sm:inline">Admin Mode</span>
+            </span>
+            <button 
+              onclick="logoutAdmin()" 
+              class="text-[11px] text-amber-200/80 hover:text-white underline">
+              Logout
+            </button>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <button 
+            onclick="openAdminModal()" 
+            title="Admin Login" 
+            class="text-amber-400/60 hover:text-amber-300 text-xs flex items-center space-x-1 bg-oak-950/60 border border-amber-900/40 px-2.5 py-1 rounded-lg transition-all">
+            <span>🔑</span>
+            <span class="hidden sm:inline">Admin</span>
+          </button>
+        `;
+      }
+    }
+
+    function openAdminModal() {
+      document.getElementById('adminModal').classList.remove('hidden');
+      document.getElementById('adminAuthError').classList.add('hidden');
+      document.getElementById('adminPinInput').value = '';
+      setTimeout(() => document.getElementById('adminPinInput').focus(), 100);
+    }
+
+    function closeAdminModal() {
+      document.getElementById('adminModal').classList.add('hidden');
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const inputPin = document.getElementById('adminPinInput').value;
+
+      if (inputPin === ADMIN_PIN) {
+        isAdmin = true;
+        sessionStorage.setItem('admin_authenticated', 'true');
+        closeAdminModal();
+        renderAdminHeaderControl();
+        renderRecommendations();
+      } else {
+        document.getElementById('adminAuthError').classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdmin = false;
+      sessionStorage.removeItem('admin_authenticated');
+      renderAdminHeaderControl();
+      renderRecommendations();
+    }
+
+    function deleteRecommendation(id) {
+      if (!isAdmin) return;
+      
+      // Deleting directly from Firestore
+      db.collection("recommendations").doc(id).delete().catch((err) => {
+        console.error("Error deleting document: ", err);
+      });
+    }
+
+    // ==========================================
+    // 4. FORM STAR RATING
     // ==========================================
     function setFormRating(stars) {
       currentFormRating = stars;
@@ -282,7 +434,7 @@
     }
 
     // ==========================================
-    // 4. SORTING & RENDERING
+    // 5. SORTING & RENDERING
     // ==========================================
     function getAverageRating(ratingsArr) {
       if (!ratingsArr || ratingsArr.length === 0) return 0;
@@ -312,6 +464,7 @@
     function renderRecommendations() {
       const container = document.getElementById('recommendationsList');
       const countEl = document.getElementById('recommendationCount');
+      const votedPours = getVotedPours();
       
       countEl.textContent = `${recommendations.length} Pour${recommendations.length === 1 ? '' : 's'}`;
 
@@ -332,9 +485,10 @@
       container.innerHTML = sortedList.map(item => {
         const avg = getAverageRating(item.ratings);
         const votesCount = item.ratings ? item.ratings.length : 0;
+        const hasVoted = votedPours.includes(item.id);
 
         return `
-          <div class="bg-oak-900/90 border border-amber-900/40 rounded-xl p-5 shadow-md hover:border-amber-700/50 transition-all flex flex-col justify-between space-y-3">
+          <div class="bg-oak-900/90 border border-amber-900/40 rounded-xl p-5 shadow-md hover:border-amber-700/50 transition-all flex flex-col justify-between space-y-3 relative">
             <div>
               <div class="flex items-start justify-between">
                 <div>
@@ -344,11 +498,17 @@
                       Recommended by <span class="font-medium text-amber-200">${escapeHtml(item.recommender)}</span>
                     </p>
                   ` : ''}
+                  ${item.kySpot ? `
+                    <p class="text-xs text-amber-300/80 mt-1 flex items-center space-x-1">
+                      <span>📍</span>
+                      <span class="italic">Favorite KY Spot: <strong>${escapeHtml(item.kySpot)}</strong></span>
+                    </p>
+                  ` : ''}
                 </div>
                 <span class="text-[11px] text-amber-400/60">${escapeHtml(item.timestamp || 'Recently')}</span>
               </div>
 
-              <!-- STAR RATING DISPLAY & INTERACTIVE VOTING -->
+              <!-- STAR RATING DISPLAY & SINGLE VOTE INTERACTION -->
               <div class="mt-3 flex items-center justify-between bg-oak-950/60 p-2.5 rounded-lg border border-amber-900/30">
                 <div class="flex items-center space-x-2">
                   <span class="text-sm font-bold text-amber-400">⭐ ${avg}</span>
@@ -356,15 +516,19 @@
                 </div>
 
                 <div class="flex items-center space-x-1">
-                  <span class="text-[10px] text-amber-400/70 mr-1 hidden sm:inline">Rate:</span>
-                  ${[1, 2, 3, 4, 5].map(star => `
-                    <button 
-                      onclick="ratePour('${item.id}',${star})" 
-                      title="Rate ${star} star${star > 1 ? 's' : ''}"
-                      class="text-amber-500 hover:scale-125 transition-transform text-sm">
-                      ★
-                    </button>
-                  `).join('')}
+                  ${hasVoted ? `
+                    <span class="text-xs text-amber-400/70 italic px-2 py-0.5 bg-amber-950/80 rounded border border-amber-900/40">You voted ✓</span>
+                  ` : `
+                    <span class="text-[10px] text-amber-400/70 mr-1 hidden sm:inline">Rate:</span>
+                    ${[1, 2, 3, 4, 5].map(star => `
+                      <button 
+                        onclick="ratePour('${item.id}', ${star})" 
+                        title="Rate ${star} star${star > 1 ? 's' : ''}"
+                        class="text-amber-500 hover:scale-125 transition-transform text-sm">
+                        ★
+                      </button>
+                    `).join('')}
+                  `}
                 </div>
               </div>
 
@@ -375,7 +539,20 @@
               ` : ''}
             </div>
 
-            <div class="pt-2 border-t border-amber-900/20 flex items-center justify-end">
+            <!-- FOOTER ACTION BAR WITH SPONSOR AND ADMIN REMOVE -->
+            <div class="pt-2 border-t border-amber-900/20 flex items-center justify-between">
+              <div>
+                ${isAdmin ? `
+                  <button 
+                    onclick="deleteRecommendation('${item.id}')" 
+                    title="Remove inappropriate post"
+                    class="inline-flex items-center space-x-1 text-red-400 hover:text-red-300 hover:bg-red-950/50 border border-red-900/40 px-2.5 py-1 rounded-lg text-xs font-medium transition-all">
+                    <span>🗑️</span>
+                    <span>Remove Pour</span>
+                  </button>
+                ` : ''}
+              </div>
+
               <a 
                 href="${venmoUrl}" 
                 target="_blank" 
@@ -393,13 +570,14 @@
     }
 
     // ==========================================
-    // 5. FIREBASE SUBMISSIONS & VOTING
+    // 6. FIREBASE SUBMISSIONS & VOTING
     // ==========================================
     function handleFormSubmit(e) {
       e.preventDefault();
 
       const bourbon = document.getElementById('bourbonName').value.trim();
       const recommender = document.getElementById('recommenderName').value.trim();
+      const kySpot = document.getElementById('favoriteKYSpot').value.trim();
       const notes = document.getElementById('tastingNotes').value.trim();
 
       if (!bourbon) return;
@@ -407,11 +585,14 @@
       db.collection("recommendations").add({
         bourbon: bourbon,
         recommender: recommender || 'Anonymous Bourbon Lover',
+        kySpot: kySpot || '',
         notes: notes,
         timestamp: 'Just now',
         ratings: [currentFormRating],
         createdAt: Date.now()
-      }).then(() => {
+      }).then((docRef) => {
+        // Mark as voted for the newly submitted pour by creator
+        recordVotedPour(docRef.id);
         document.getElementById('pourForm').reset();
         setFormRating(5);
       }).catch(err => {
@@ -420,12 +601,20 @@
     }
 
     function ratePour(id, stars) {
+      const votedPours = getVotedPours();
+      if (votedPours.includes(id)) {
+        return; // Prevent duplicate voting from same device
+      }
+
       const docRef = db.collection("recommendations").doc(id);
       docRef.get().then(doc => {
         if (doc.exists) {
           const currentRatings = doc.data().ratings || [];
           docRef.update({
             ratings: [...currentRatings, stars]
+          }).then(() => {
+            recordVotedPour(id);
+            renderRecommendations();
           });
         }
       }).catch(err => {
