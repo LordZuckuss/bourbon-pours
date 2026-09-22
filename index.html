@@ -48,10 +48,14 @@
       font-family: 'Playfair Display', serif;
     }
   </style>
+
+  <!-- Firebase SDKs (Compat version for direct browser script support) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body class="bg-oak-950 text-amber-50 min-h-screen flex flex-col antialiased selection:bg-amber-600 selection:text-white">
 
-  <!-- NAVIGATION HEADER (NO QR CODE BUTTON) -->
+  <!-- NAVIGATION HEADER -->
   <header class="sticky top-0 z-40 bg-oak-900/90 backdrop-blur-md border-b border-amber-900/40 px-4 py-3 sm:px-8">
     <div class="max-w-4xl mx-auto flex items-center justify-between">
       <div class="flex items-center space-x-3">
@@ -150,7 +154,7 @@
           </p>
           <a 
             id="directVenmoBtn" 
-            href="#" 
+            href="https://venmo.com/Daniel-Sink" 
             target="_blank" 
             rel="noopener noreferrer"
             class="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 py-2 rounded-xl text-xs shadow-md transition-all">
@@ -210,42 +214,33 @@
     <p>Cheers! Please drink responsibly.</p>
   </footer>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- JAVASCRIPT LOGIC WITH REAL-TIME FIREBASE DB -->
   <script>
     // ==========================================
     // 1. CONFIGURATION
     // ==========================================
-    const MY_VENMO_HANDLE = "Daniel-Sink"; // Replace with your actual Venmo handle (without @)
+    const MY_VENMO_HANDLE = "Daniel-Sink"; 
+
+    // FIREBASE CONFIGURATION
+    const firebaseConfig = {
+      apiKey: "AIzaSyAWVZRlQWjRBEH3AuKPdwG2VzdZf1DsDqc",
+      authDomain: "bourbon-pours.firebaseapp.com",
+      projectId: "bourbon-pours",
+      storageBucket: "bourbon-pours.firebasestorage.app",
+      messagingSenderId: "1080238088421",
+      appId: "1:1080238088421:web:de8412b4118f55a4ff340c"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
     let currentFormRating = 5;
     let currentSort = 'highest';
-
-    // Default sample data with ratings
-    const DEFAULT_RECOMMENDATIONS = [
-      {
-        id: "1",
-        bourbon: "E.H. Taylor Small Batch",
-        recommender: "Dan S.",
-        notes: "Classic caramel sweetness with perfectly balanced rye spice on the finish.",
-        timestamp: "Recently added",
-        ratings: [5, 5, 4, 5],
-        createdAt: Date.now() - 100000
-      },
-      {
-        id: "2",
-        bourbon: "Woodford Reserve Double Oaked",
-        recommender: "Wes",
-        notes: "Rich, dark chocolate and toasted oak notes. Unbeatable dessert pour.",
-        timestamp: "Recently added",
-        ratings: [5, 5, 5, 4],
-        createdAt: Date.now() - 50000
-      }
-    ];
-
     let recommendations = [];
 
     // ==========================================
-    // 2. INITIALIZATION
+    // 2. INITIALIZATION & LIVE LISTENER
     // ==========================================
     window.addEventListener('DOMContentLoaded', () => {
       // Set direct Venmo button link
@@ -256,19 +251,16 @@
         venmoBtn.href = "https://venmo.com";
       }
 
-      // Load items from local storage or defaults
-      const stored = localStorage.getItem('bourbon_recommendations');
-      if (stored) {
-        try {
-          recommendations = JSON.parse(stored);
-        } catch(e) {
-          recommendations = DEFAULT_RECOMMENDATIONS;
-        }
-      } else {
-        recommendations = DEFAULT_RECOMMENDATIONS;
-      }
-
-      renderRecommendations();
+      // Real-time listener for live updates across all devices
+      db.collection("recommendations").onSnapshot((snapshot) => {
+        recommendations = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        renderRecommendations();
+      }, (error) => {
+        console.error("Firebase read error: ", error);
+      });
     });
 
     // ==========================================
@@ -290,7 +282,7 @@
     }
 
     // ==========================================
-    // 4. SORTING & RENDERING RECOMMENDATIONS
+    // 4. SORTING & RENDERING
     // ==========================================
     function getAverageRating(ratingsArr) {
       if (!ratingsArr || ratingsArr.length === 0) return 0;
@@ -353,7 +345,7 @@
                     </p>
                   ` : ''}
                 </div>
-                <span class="text-[11px] text-amber-400/60">${escapeHtml(item.timestamp)}</span>
+                <span class="text-[11px] text-amber-400/60">${escapeHtml(item.timestamp || 'Recently')}</span>
               </div>
 
               <!-- STAR RATING DISPLAY & INTERACTIVE VOTING -->
@@ -401,18 +393,8 @@
     }
 
     // ==========================================
-    // 5. VOTING & FORM SUBMISSION
+    // 5. FIREBASE SUBMISSIONS & VOTING
     // ==========================================
-    function ratePour(id, stars) {
-      const target = recommendations.find(r => r.id === id);
-      if (target) {
-        if (!target.ratings) target.ratings = [];
-        target.ratings.push(stars);
-        localStorage.setItem('bourbon_recommendations', JSON.stringify(recommendations));
-        renderRecommendations();
-      }
-    }
-
     function handleFormSubmit(e) {
       e.preventDefault();
 
@@ -422,24 +404,33 @@
 
       if (!bourbon) return;
 
-      const newRecommendation = {
-        id: Date.now().toString(),
+      db.collection("recommendations").add({
         bourbon: bourbon,
         recommender: recommender || 'Anonymous Bourbon Lover',
         notes: notes,
         timestamp: 'Just now',
         ratings: [currentFormRating],
         createdAt: Date.now()
-      };
+      }).then(() => {
+        document.getElementById('pourForm').reset();
+        setFormRating(5);
+      }).catch(err => {
+        console.error("Error writing to DB: ", err);
+      });
+    }
 
-      recommendations.unshift(newRecommendation);
-      localStorage.setItem('bourbon_recommendations', JSON.stringify(recommendations));
-
-      renderRecommendations();
-
-      // Reset form
-      document.getElementById('pourForm').reset();
-      setFormRating(5);
+    function ratePour(id, stars) {
+      const docRef = db.collection("recommendations").doc(id);
+      docRef.get().then(doc => {
+        if (doc.exists) {
+          const currentRatings = doc.data().ratings || [];
+          docRef.update({
+            ratings: [...currentRatings, stars]
+          });
+        }
+      }).catch(err => {
+        console.error("Error updating rating: ", err);
+      });
     }
 
     function escapeHtml(str) {
